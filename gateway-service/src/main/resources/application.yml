@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: gateway-api
+
+  cloud:
+    gateway:
+      routes:
+        - id: productService
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/products/**
+          filters:
+            - AddRequestHeader=X-Request-Header,Product-Service Header
+            - AddResponseHeader=Cache-Control, max-age=360, private
+            - AddResponseHeader=X-Request-ID, ${random.uuid}
+            - AddResponseHeader=X-Response-Header, Product-Service Header
+
+    discovery:
+      locator:
+        lower-case-service-id: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      productServiceCircuitBreaker:
+#        sliding-window-size: 10
+#        minimum-number-of-calls: 5
+#        failure-rate-threshold: 50
+#        wait-duration-in-open-state: 10000
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8083/eureka/
+
+server:
+  port: 8888
